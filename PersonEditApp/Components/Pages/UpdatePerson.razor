@@ -1,0 +1,150 @@
+﻿@page "/update"
+@rendermode InteractiveServer
+@using PersonEditApp.Models
+@using static System.Net.WebRequestMethods
+<PageTitle>Update Persons</PageTitle>
+
+@* <h1 class="text-center mb-3">Create customers</h1> *@
+<div class="row align-content-center">
+    <div class="col-lg-10  align-items-center">
+        <h1 class="mb-3">Update Existing Persons Data</h1>
+        
+        <div class="row md-3">
+            <div class="col-md-4">
+                <p class="text-center mb-3">Add Id to be fetched: </p>
+            </div>
+            
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Enter Id" @bind="searchId" /><br>
+                @if (error)
+                {
+                    <p class="text-danger">Record Not Found, Enter Valid Id</p>
+                }
+            </div>
+            
+        </div>
+
+        <div class="col-md-4 d-grid">
+                <button class="btn btn-outline-primary" @onclick="fetchCustomer">Fetch</button>
+            </div>
+
+        <div class="row md-3">
+            <div class="offset-md-4 col-md-4 d-grid">
+                <br>
+            </div>
+        </div>
+        @if (fetched && error == false)
+        {
+            <div class="row md-3">
+                <div class="col-md-4">
+                    <p class="text-center mb-3">First Name: </p>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" placeholder="Enter First Name" @bind="Personform.Fname" />
+                </div>
+            </div>
+            <br>
+            <div class="row md-3">
+                <div class="col-md-4">
+                    <p class="text-center mb-3">Last Name: </p>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" placeholder="Enter Last Name" @bind="Personform.Lname" />
+                </div>
+            </div>
+            <br>
+            <div class="row md-3">
+                <div class="col-md-4">
+                    <p class="text-center mb-3">Email: </p>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" placeholder="Enter Email" @bind="Personform.Email" />
+                </div>
+            </div>
+            <br>
+            <div class="row md-3">
+                <div class="col-md-4">
+                    <p class="text-center mb-3">Phone: </p>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" placeholder="Enter Phone Number" @bind="Personform.Phone" />
+                </div>
+            </div>
+            <br>
+            <div class="row md-3">
+                <div class="col-md-4">
+                    <p class="text-center mb-3">Password: </p>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" placeholder="Enter Password" @bind="Personform.Pass" />
+                </div>
+            </div>
+            <br>
+            <div class="col-md-4 d-grid">
+                <button class="btn btn-outline-primary" @onclick="saveChanges">Submit</button>
+            </div>
+        }
+    </div>
+
+</div>
+@inject HttpClient Http
+@inject NavigationManager navManager
+@code {
+    public bool first = false;
+    public bool error = false;
+    public bool fetched = false;
+    public int searchId;
+    public Person Personform { set; get; } = new();
+
+    protected async Task saveChanges()
+    {
+        Personform.Id = searchId;
+        var response = await Http.PutAsJsonAsync<Person>("https://localhost:7065/api/Persons/" + searchId, Personform);
+        if (response.IsSuccessStatusCode)
+        {
+            navManager.NavigateTo("/Sucess");
+            Console.WriteLine("Entering");
+        }
+        else
+        {
+            // navManager.NavigateTo("/Sucess");
+            Console.WriteLine("Error");
+        }
+
+
+    }
+    protected async Task fetchCustomer()
+    {
+        try
+        {
+            var personData = await Http.GetFromJsonAsync<Person>("https://localhost:7065/api/Persons/" + searchId);
+            if (personData == null)
+            {
+                first = true;
+
+            }
+
+            else
+            {
+                // customerform.CustomerId = Int32.Parse(customerdata?.CustomerId) ?? "";
+                Personform.Fname = personData?.Fname ?? "";
+                Personform.Lname = personData?.Lname ?? "";
+                Personform.Email = personData?.Email ?? "";
+                Personform.Phone = personData?.Phone ?? "";
+                Personform.Pass = personData?.Pass ?? "";
+                fetched = true;
+            }
+            error = false;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            Personform.Fname = "";
+            Personform.Lname = "";
+            Personform.Email = "";
+            Personform.Phone = "";
+            Personform.Pass = "";
+            error = true;
+        }
+    }
+}

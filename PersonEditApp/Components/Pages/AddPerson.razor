@@ -1,0 +1,103 @@
+﻿@page "/add"
+@rendermode InteractiveServer
+@using PersonEditApp.Models
+@using static System.Net.WebRequestMethods
+<PageTitle>Add Person</PageTitle>
+
+@* <h1 class="text-center mb-3">Create customers</h1> *@
+<div class="row ">
+    <div class="col-lg-10 align-content-center">
+        <h1 class="mb-3">Create Person Data</h1>
+
+    
+        <div class="row md-3">
+            <div class="col-md-4">
+                 <p class="text-center mb-3">First Name: </p>
+            </div>
+            <div class="col-md-4">
+                <input name="fname" class="form-control" placeholder="Enter First Name" @bind="personData.Fname" />
+                <p class="text-danger">*Required Field</p>
+            </div>
+        </div>
+     
+        <div class="row md-3">
+            <div class="col-md-4">
+                <p class="text-center mb-3">Last Name: </p>
+            </div>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Enter Last Name" @bind="personData.Lname" />
+                    <p class="text-danger">*Required Field</p>
+               
+            </div>
+        </div>
+     
+        <div class="row md-3">
+            <div class="col-md-4">
+                <p class="text-center mb-3">Email: </p>
+            </div>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Enter Email" @bind="personData.Email" />
+                <p class="text-danger">*Required Field</p>
+            </div>
+        </div>
+       
+        <div class="row md-3">
+            <div class="col-md-4">
+                <p class="text-center mb-3">Phone: </p>
+            </div>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Enter Phone Number" @bind="personData.Phone" />
+                <p class="text-danger">*Required Field</p>
+            </div>
+        </div>
+
+        <div class="row md-3">
+            <div class="col-md-4">
+                <p class="text-center mb-3">Password: </p>
+            </div>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Enter Password" @bind="personData.Pass" />
+                <p class="text-danger">*Required Field</p>
+            </div>
+        </div>
+       
+        <div class="row md-3">
+            <div class="col-md-9 text-center">
+                <a href="/update" class="text-center">Update Existing User!</a>
+            </div>
+        </div>
+        <br>
+        <div class="row md-3">
+            <div class="col-md-9 text-center">
+                <button class="btn btn-outline-primary" @onclick="submitEVE">Submit</button>
+            </div>
+            @* <div class="col-md-4 d-grid">
+            <button class="btn btn-outline-primary" @onclick="saveChanges">Submit</button>
+            </div> *@
+        </div>
+
+    </div>
+
+</div>
+@inject HttpClient Http
+@inject NavigationManager navManager
+@code {
+    public Person personData { set; get; } = new();
+
+    protected async Task submitEVE()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync<Person>("https://localhost:7065/api/Persons", personData);
+            if (response.IsSuccessStatusCode)
+            {
+                navManager.NavigateTo("/Sucess");
+                Console.WriteLine("Entering");
+            }
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine("Error"+e);
+        }
+    }
+}
